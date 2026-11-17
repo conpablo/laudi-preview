@@ -217,7 +217,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
           <section class="panel" id="p-equipo">
             <span class="eyebrow">Equipo</span>
             <h2>Quiénes somos</h2>
-            <p>Rolfi, Pablo, Mario, Eduardo y Sole. [Texto de Laudi.]</p>
+            <p>Rolfi, Mario, Eduardo, Sole y Pablo. [Texto de Laudi.]</p>
           </section>
           <section class="panel live" id="p-contacto">
             <span class="eyebrow">Contacto</span>
@@ -449,7 +449,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     });
 
     /* Equipo: cinco personas en fila, con el centro apenas adelantado */
-    ['Rolfi', 'Pablo', 'Mario', 'Eduardo', 'Sole'].forEach(function (name, i) {
+    ['Rolfi', 'Mario', 'Eduardo', 'Sole', 'Pablo'].forEach(function (name, i) {
       var x = TX + (i - 2) * 1.5, z = -0.22 * (i - 2) * (i - 2);
       var m = new THREE.Mesh(new THREE.SphereGeometry(0.45, 40, 28), new THREE.MeshStandardMaterial({ color: C.human, roughness: 0.8 }));
       m.position.set(x, LOW, z);
