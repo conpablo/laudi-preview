@@ -520,11 +520,11 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
       floor1[0].position.y = floor1[1].position.y = L.ay - 1.0;
     }
     ctrl.material.opacity += (s2 * 0.95 - ctrl.material.opacity) * a;
-    ctrl.visible = ctrl.material.opacity > 0.01;
+    ctrl.visible = false; /* sin aro: queda solo el punto del chequeo semanal */
     var da = reduce ? 1.2 : t * 0.5;
     ctrlDot.position.set(L.ring * Math.cos(da), L.ay, L.ring * Math.sin(da));
     ctrlDot.material.opacity = ctrl.material.opacity;
-    ctrlDot.visible = ctrl.visible;
+    ctrlDot.visible = ctrl.material.opacity > 0.01;
 
     /* Nodos del organigrama */
     nodes.forEach(function (n) {
