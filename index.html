@@ -302,7 +302,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
   function lerp(a, b, t) { return a + (b - a) * t; }
 
   /* ---------- Three.js ---------- */
-  var renderer, scene, camera, group, floor1 = [], nodes = [], lines = [], marks = [], orbit, orbit2, ctrl, ctrlDot, ctrlLbl;
+  var renderer, scene, camera, group, floor1 = [], nodes = [], lines = [], marks = [], ctrl, ctrlDot, ctrlLbl;
   var ptr = { on: false, x: 0, y: 0, type: 'mouse' };
   var active = null, shown = null, last = 0, first = true, camDist = 12, loopKey = '';
   var yawU = 0, yawV = 0, pitchU = 0, spinAng = 0, dragging = false, down = null, lastX = 0, lastY = 0, idleAt = 0;
@@ -408,9 +408,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     stars.frustumCulled = false;
     group.add(stars);
 
-    /* Órbitas del organigrama */
-    orbit = mkLoop(160, C.line); group.add(orbit);
-    orbit2 = mkLoop(96, C.line); group.add(orbit2);
+    /* Aro de control (escalón 3) */
     ctrl = mkLoop(160, C.accent); group.add(ctrl);
     ctrlDot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 14), new THREE.MeshBasicMaterial({ color: C.accent, transparent: true, opacity: 0, fog: false }));
     group.add(ctrlDot);
@@ -519,13 +517,8 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     if (key !== loopKey) {
       loopKey = key;
       setLoop(ctrl, function (x) { return [L.ring * Math.cos(x), L.ay, L.ring * Math.sin(x)]; });
-      setLoop(orbit, function (x) { return [L.R * Math.cos(x), L.ay, L.R * Math.sin(x)]; });
-      setLoop(orbit2, function (x) { return [L.r1 * Math.cos(x), L.oy - 0.5, L.r1 * Math.sin(x)]; });
       floor1[0].position.y = floor1[1].position.y = L.ay - 1.0;
     }
-    orbit.material.opacity += (s1 * 0.9 - orbit.material.opacity) * a;
-    orbit.visible = orbit.material.opacity > 0.01;
-    orbit2.material.opacity = 0.9;
     ctrl.material.opacity += (s2 * 0.95 - ctrl.material.opacity) * a;
     ctrl.visible = ctrl.material.opacity > 0.01;
     var da = reduce ? 1.2 : t * 0.5;
