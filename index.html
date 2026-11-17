@@ -302,7 +302,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
   function lerp(a, b, t) { return a + (b - a) * t; }
 
   /* ---------- Three.js ---------- */
-  var renderer, scene, camera, group, floor1 = [], nodes = [], lines = [], marks = [], ctrl, ctrlDot, ctrlLbl;
+  var renderer, scene, camera, group, floor1 = [], nodes = [], lines = [], marks = [], props = [], ctrl, ctrlDot, ctrlLbl;
   var ptr = { on: false, x: 0, y: 0, type: 'mouse' };
   var active = null, shown = null, last = 0, first = true, camDist = 12, loopKey = '';
   var yawU = 0, yawV = 0, pitchU = 0, spinAng = 0, dragging = false, down = null, lastX = 0, lastY = 0, idleAt = 0;
@@ -340,6 +340,8 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     return l;
   }
   function mark(x, y, z, text, st, cls) { marks.push({ p: new THREE.Vector3(x, y, z), el: mkLabel(text, cls), st: st, map: cls === 'is-map' }); }
+  /* Elementos que reaccionan al cursor fuera del organigrama: se agrandan y se acercan a la cámara */
+  function prop(obj, st, reach, gain, pull) { props.push({ obj: obj, home: obj.position.clone(), st: st, reach: reach, gain: gain, pull: pull, kk: 0 }); }
   function grids(y) {
     var a = new THREE.GridHelper(140, 280, C.minor, C.minor), b = new THREE.GridHelper(140, 28, C.major, C.major);
     [a, b].forEach(function (g) { g.material.transparent = true; g.material.opacity = 0.9; g.position.y = y; group.add(g); });
@@ -417,16 +419,18 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     /* Video: una pantalla flotando al costado */
     var pg = new THREE.PlaneGeometry(6.4, 3.6);
     var scr = new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ color: 0x0f1216, side: THREE.DoubleSide }));
-    scr.position.set(VX, VY, 0);
-    group.add(scr);
+    var scrG = new THREE.Group();
+    scrG.position.set(VX, VY, 0);
+    group.add(scrG);
+    scrG.add(scr);
     var fr = new THREE.LineSegments(new THREE.EdgesGeometry(pg), new THREE.LineBasicMaterial({ color: C.wire }));
-    fr.position.set(VX, VY, 0);
-    group.add(fr);
+    scrG.add(fr);
     var tri = new THREE.BufferGeometry();
     tri.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-0.24, 0.32, 0, -0.24, -0.32, 0, 0.36, 0, 0]), 3));
     var play = new THREE.Mesh(tri, new THREE.MeshBasicMaterial({ color: C.hot, side: THREE.DoubleSide }));
-    play.position.set(VX, VY, 0.02);
-    group.add(play);
+    play.position.set(0, 0, 0.02);
+    scrG.add(play);
+    prop(scrG, 4, 2.2, 0.06, 0.8);
     mark(VX, VY - 2.05, 0, 'Video · 60 seg', 4);
 
     /* El día Cum Laudi: una línea de tiempo con sus horas */
@@ -435,6 +439,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
       var dot = new THREE.Mesh(new THREE.OctahedronGeometry(0.2, 0), new THREE.MeshStandardMaterial({ color: C.human, roughness: 0.8, flatShading: true }));
       dot.position.set(VX - 4 + h * 2, LOW, 0);
       group.add(dot);
+      prop(dot, 5, 0.7, 1.0, 0.3);
       mark(VX - 4 + h * 2, LOW - 0.42, 0, '[Hora]', 5);
     }
 
@@ -445,6 +450,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
       m.position.set(r[1] * 0.95, LOW, r[2] * 0.95);
       m.add(new THREE.LineSegments(new THREE.EdgesGeometry(slabG), new THREE.LineBasicMaterial({ color: C.wire, transparent: true, opacity: 0.6 })));
       group.add(m);
+      prop(m, 6, 0.9, 0.25, 0.5);
       mark(r[1] * 0.95, LOW - 0.55, r[2] * 0.95, r[0], 6);
     });
 
@@ -454,6 +460,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
       var m = new THREE.Mesh(new THREE.SphereGeometry(0.45, 40, 28), new THREE.MeshStandardMaterial({ color: C.human, roughness: 0.8 }));
       m.position.set(x, LOW, z);
       group.add(m);
+      prop(m, 7, 0.8, 0.3, 0.6);
       mark(x, LOW - 0.72, z, name, 7);
     });
 
@@ -616,6 +623,20 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
       m.el.style.opacity = o.toFixed(2);
     });
 
+    var propHot = false;
+    props.forEach(function (o) {
+      var k = 0;
+      if (ptr.on && !dragging && Math.abs(P - o.st) < 0.5) {
+        tmp.copy(o.home).project(camera);
+        k = smooth(0, 1, 1 - Math.hypot((tmp.x * 0.5 + 0.5) * w - ptr.x, (-tmp.y * 0.5 + 0.5) * h - ptr.y) / (Rpx * o.reach));
+      }
+      o.kk += (k - o.kk) * fast;
+      if (o.kk > 0.5) propHot = true;
+      o.obj.scale.setScalar(1 + o.gain * o.kk);
+      tmp2.copy(camera.position).sub(o.home).normalize().multiplyScalar(o.pull * o.kk);
+      o.obj.position.copy(o.home).add(tmp2);
+    });
+
     active = best;
     if (active !== shown) {
       shown = active;
@@ -630,7 +651,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     }
 
     cur.classList.toggle('drag', dragging);
-    cur.classList.toggle('node', !!active && !dragging);
+    cur.classList.toggle('node', (!!active || propHot) && !dragging);
     cur.classList.toggle('last', Math.round(P) === N - 1);
     updatePanels();
     first = false;
