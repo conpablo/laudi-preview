@@ -217,7 +217,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
           <section class="panel" id="p-equipo">
             <span class="eyebrow">Equipo</span>
             <h2>Quiénes somos</h2>
-            <p>Rolfi y Pablo. [Texto de Laudi.]</p>
+            <p>Rolfi, Pablo, Mario, Eduardo y Sole. [Texto de Laudi.]</p>
           </section>
           <section class="panel live" id="p-contacto">
             <span class="eyebrow">Contacto</span>
@@ -448,12 +448,13 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
       mark(r[1] * 0.95, LOW - 0.55, r[2] * 0.95, r[0], 6);
     });
 
-    /* Equipo: dos personas */
-    [['Rolfi', -0.85], ['Pablo', 0.85]].forEach(function (p) {
-      var m = new THREE.Mesh(new THREE.SphereGeometry(0.5, 40, 28), new THREE.MeshStandardMaterial({ color: C.human, roughness: 0.8 }));
-      m.position.set(TX + p[1], LOW, 0);
+    /* Equipo: cinco personas en fila, con el centro apenas adelantado */
+    ['Rolfi', 'Pablo', 'Mario', 'Eduardo', 'Sole'].forEach(function (name, i) {
+      var x = TX + (i - 2) * 1.5, z = -0.22 * (i - 2) * (i - 2);
+      var m = new THREE.Mesh(new THREE.SphereGeometry(0.45, 40, 28), new THREE.MeshStandardMaterial({ color: C.human, roughness: 0.8 }));
+      m.position.set(x, LOW, z);
       group.add(m);
-      mark(TX + p[1], LOW - 0.82, 0, p[0], 7);
+      mark(x, LOW - 0.72, z, name, 7);
     });
 
     /* Conexiones entre lugares: el recorrido se ve entero desde lejos */
@@ -461,7 +462,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     seg([VX, VY - 1.8, 0], [VX, LOW + 0.3, 0], C.line, 0.7);
     seg([VX - 4.3, LOW, 0], [1.9, LOW, 0], C.line, 0.7);
     seg([0, -2.3, 0], [0, LOW + 0.3, 0], C.line, 0.7);
-    seg([-1.9, LOW, 0], [TX + 1.6, LOW, 0], C.line, 0.7);
+    seg([-1.9, LOW, 0], [TX + 3.7, LOW, 0], C.line, 0.7);
 
     /* Nombres de cada lugar, solo en la vista general del final */
     mark(0, 3.5, 0, 'Dirección y áreas', 8, 'is-map');
@@ -495,7 +496,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
       { t: [VX, VY - 0.2, 0], W: 3.9, H: 2.6, pitch: 0.04, yaw: 0 },
       { t: [VX, LOW - 0.2, 0], W: 4.9, H: 1.7, pitch: 0.24, yaw: -0.3 },
       { t: [0, LOW - 0.1, 0], W: 2.9, H: 1.9, pitch: 0.42, yaw: 0.5 },
-      { t: [TX, LOW - 0.1, 0], W: 2.4, H: 1.6, pitch: 0.1, yaw: 0 },
+      { t: [TX, LOW - 0.1, 0], W: 4.0, H: 1.5, pitch: 0.12, yaw: 0 },
       { t: [0, -4.2, 0], W: 20.5, H: 8.6, pitch: 0.12, yaw: 0 }
     ];
   }
