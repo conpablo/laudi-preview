@@ -144,6 +144,18 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
 .device.narrow .counter{top:24px}
 .device.narrow #card{left:8px;right:8px;top:36px;width:auto;transform:none !important}
 
+/* Versión plana: sin 3D, todo en columna, formulario a mano */
+.flat{display:none;padding:24px var(--gut) 48px;max-width:720px;margin:0 auto}
+.device.is-flat{scroll-snap-type:none}
+.device.is-flat .hero{display:none}
+.device.is-flat .flat{display:flex;flex-direction:column;gap:20px}
+.flat .panel{position:static;width:auto;opacity:1 !important;visibility:visible !important;transform:none !important;pointer-events:auto;padding:22px 0;border-top:1px solid var(--line)}
+.flat .panel:first-of-type{border-top:0}
+.flat h1{font-size:clamp(28px,7vw,44px)}
+.flat .cue{display:none !important}
+.flat-cta{align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border-radius:999px;background:var(--ink);color:var(--surface);text-decoration:none;font-size:15px}
+.mode{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--mute);text-decoration:underline;text-underline-offset:3px}
+@media (max-width:520px){.flat form{grid-template-columns:1fr}}
 @media (max-width:720px){
   .seg.dev{display:none}
   .bar{padding:10px 12px 6px}
@@ -160,7 +172,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
 <main class="stage">
   <div class="device" id="device" tabindex="-1">
 
-    <div class="m-head"><div class="m-head-in"><span class="brand"><span class="logo">LOGO</span><span class="pv">Vista previa · v4</span></span><span class="langs">ES · PT · EN · DE</span></div></div>
+    <div class="m-head"><div class="m-head-in"><span class="brand"><span class="logo">LOGO</span><span class="pv">Vista previa · v4</span></span><span class="brand"><a class="mode" id="mode" href="?v=plano">Versión simple</a><span class="langs">ES · PT · EN · DE</span></span></div></div>
 
     <div class="hero" id="hero">
       <div class="pin" id="pin">
@@ -217,7 +229,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
           <section class="panel" id="p-equipo">
             <span class="eyebrow">Equipo</span>
             <h2>Quiénes somos</h2>
-            <p>Rolfi, Mario, Eduardo, Sole y Pablo. [Texto de Laudi.]</p>
+            <p>Rolfi, Mauro, Eduardo, Sole y Pablo. [Texto de Laudi.]</p>
           </section>
           <section class="panel live" id="p-contacto">
             <span class="eyebrow">Contacto</span>
@@ -238,6 +250,9 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
         <nav class="rail" id="rail" aria-label="Paradas"></nav>
       </div>
       <div class="snaps" id="snaps"></div>
+    </div>
+    <div class="flat" id="flat">
+      <a class="flat-cta" href="#p-contacto">Quiero que me contacten</a>
     </div>
   </div>
 </main>
@@ -455,7 +470,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     });
 
     /* Equipo: cinco personas en fila, con el centro apenas adelantado */
-    ['Rolfi', 'Mario', 'Eduardo', 'Sole', 'Pablo'].forEach(function (name, i) {
+    ['Rolfi', 'Mauro', 'Eduardo', 'Sole', 'Pablo'].forEach(function (name, i) {
       var x = TX + (i - 2) * 1.5, z = -0.22 * (i - 2) * (i - 2);
       var m = new THREE.Mesh(new THREE.SphereGeometry(0.45, 40, 28), new THREE.MeshStandardMaterial({ color: C.human, roughness: 0.8 }));
       m.position.set(x, LOW, z);
@@ -776,7 +791,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
   function goTo(i) { device.scrollTo({ top: clamp(i, 0, N - 1) * pinH, behavior: reduce ? 'auto' : 'smooth' }); }
   var wheelAcc = 0, wheelLock = 0, wheelAt = 0;
   device.addEventListener('wheel', function (e) {
-    if (e.ctrlKey) return;
+    if (e.ctrlKey || device.classList.contains('is-flat')) return;
     e.preventDefault();
     var now = performance.now();
     if (now < wheelLock) { wheelLock = Math.max(wheelLock, now + 140); return; }
@@ -791,7 +806,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
   }, { passive: false });
   device.addEventListener('keydown', function (e) {
     var tag = e.target && e.target.tagName;
-    if (tag === 'INPUT' || tag === 'BUTTON') return;
+    if (tag === 'INPUT' || tag === 'BUTTON' || device.classList.contains('is-flat')) return;
     if (e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) { goTo(Math.round(P) + 1); e.preventDefault(); }
     else if (e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) { goTo(Math.round(P) - 1); e.preventDefault(); }
   });
@@ -804,8 +819,19 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
 
   /* ---------- Arranque ---------- */
   var raf = 0;
-  var ok = initGL();
-  if (!ok) sceneEl.classList.add('no-gl');
+  /* Versión plana: si el 3D no arranca, si se pide (?v=plano) o si es un celular con poco equipo */
+  var q = (location.search.match(/[?&]v=([a-z0-9]+)/) || [])[1];
+  var nav = navigator, weak = (nav.connection && nav.connection.saveData) || (nav.deviceMemory && nav.deviceMemory < 4) || (nav.hardwareConcurrency && nav.hardwareConcurrency < 4);
+  var flatMode = q === 'plano' || (q !== '3d' && noHover && weak);
+  var ok = flatMode ? false : initGL();
+  if (!ok) {
+    var flat = $('#flat'), cta = flat.firstElementChild;
+    panels.forEach(function (el) { flat.insertBefore(el, cta); });
+    flat.insertBefore(cta, $('#p-cumlaudi'));
+    device.classList.add('is-flat');
+    var m = $('#mode'); m.textContent = 'Ver el recorrido 3D'; m.href = '?v=3d';
+    $('#counter').style.display = 'none';
+  }
   onResize();
   updatePanels();
   if (ok) {
