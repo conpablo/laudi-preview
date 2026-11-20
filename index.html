@@ -200,11 +200,16 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
             <span class="eyebrow"><b>Escalón 2</b> · Nivel táctico</span>
             <h2>Empresa</h2>
             <p>Diagnóstico, organigrama de agentes, reglas, de 4 a 10 agentes y capacitación. De 4 a 6 semanas.</p>
+            <p>Un agente es una herramienta. Un equipo de agentes con reglas, dirigido por vos, es otra empresa.</p>
           </section>
           <section class="panel" id="p-control">
             <span class="eyebrow"><b>Escalón 3</b> · Gobierno y supervisión</span>
             <h2>Control</h2>
-            <p>Chequeo semanal y consultas. Mínimo 6 meses.</p>
+            <p>Cada semana revisamos qué hizo cada agente: reglas al día, memoria con tope y quién hizo qué. Mínimo 6 meses.</p>
+            <ul class="rules">
+              <li><b>Qué no hace sin tu OK.</b> Lo que sale para afuera, toca plata o borra algo: el agente lo propone en una línea y espera tu «dale».</li>
+              <li><b>Qué pasa cuando algo se rompe.</b> Un vigía lo detecta, el agente lo arregla o te guía, y queda anotado quién lo resolvió y en cuánto.</li>
+            </ul>
           </section>
           <section class="panel" id="p-video">
             <span class="eyebrow">Video</span>
@@ -429,7 +434,7 @@ form button{justify-self:start;min-height:44px;padding:0 24px;border:0;border-ra
     ctrl = mkLoop(160, C.accent); group.add(ctrl);
     ctrlDot = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 14), new THREE.MeshBasicMaterial({ color: C.accent, transparent: true, opacity: 0, fog: false }));
     group.add(ctrlDot);
-    ctrlLbl = mkLabel('Chequeo semanal', 'is-gold');
+    ctrlLbl = mkLabel('Revisión semanal', 'is-gold');
 
     /* Video: una pantalla flotando al costado */
     var pg = new THREE.PlaneGeometry(6.4, 3.6);
